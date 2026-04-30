@@ -8,6 +8,93 @@ Run **one fresh Gemma session per task**, commit and push after each task, then 
 
 Do **not** ask Gemma to implement all tasks in one giant session.
 
+## Overnight asynchronous runner
+
+For the actual overnight workflow, use the included runner script instead of manually restarting Gemma after each task.
+
+```bash
+cd ~/projects/gemma-coding-test
+HERMES_PROFILE=gemma scripts/run-gemma-tasks.sh
+```
+
+The runner automates the manual pattern:
+
+1. Ensure the working tree is clean.
+2. Pull latest `main`.
+3. Find every `docs/task-packets/TASK-*.md` file in order.
+4. Start a **fresh Hermes/Gemma session** for one task packet.
+5. Wait for Gemma to finish.
+6. Verify Gemma created a commit.
+7. Verify the working tree is clean.
+8. Push to GitHub.
+9. Move to the next task.
+10. Stop immediately if any task fails.
+
+This gives Jake asynchronous execution while preserving the clean one-session-per-task evaluation design.
+
+### Dry run
+
+Preview what would run:
+
+```bash
+cd ~/projects/gemma-coding-test
+DRY_RUN=1 HERMES_PROFILE=gemma scripts/run-gemma-tasks.sh
+```
+
+### Resume from a specific task
+
+If the run stops at Task 006, fix the issue and resume at Task 006:
+
+```bash
+cd ~/projects/gemma-coding-test
+START_AT=TASK-006 HERMES_PROFILE=gemma scripts/run-gemma-tasks.sh
+```
+
+### Stop after a specific task
+
+Run only a subset:
+
+```bash
+cd ~/projects/gemma-coding-test
+STOP_AFTER=TASK-004 HERMES_PROFILE=gemma scripts/run-gemma-tasks.sh
+```
+
+### Run detached overnight
+
+If you want to disconnect the terminal, run it detached and redirect output to `.arena/overnight.log`.
+
+```bash
+cd ~/projects/gemma-coding-test
+mkdir -p .arena
+# Run this from your shell:
+# HERMES_PROFILE=gemma scripts/run-gemma-tasks.sh > .arena/overnight.log 2>&1 &
+```
+
+Then check progress later:
+
+```bash
+tail -f .arena/overnight.log
+git log --oneline -10
+```
+
+### Run in tmux overnight
+
+Recommended if you want to reattach and watch:
+
+```bash
+cd ~/projects/gemma-coding-test
+tmux new-session -s gemma-arena
+HERMES_PROFILE=gemma scripts/run-gemma-tasks.sh
+```
+
+Detach with `Ctrl-b`, then `d`.
+
+Reattach later:
+
+```bash
+tmux attach -t gemma-arena
+```
+
 ## Why one session per task?
 
 This repo is a coding-agent evaluation. The goal is not only to build the app; it is also to measure whether Gemma can follow instructions cleanly.

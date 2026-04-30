@@ -16,9 +16,16 @@ This seed repo contains the planning artifacts Gemma needs before implementation
 
 ## Recommended execution model
 
-Use **one fresh Gemma session per task**, commit and push after each task, then start the next task only after verifying the push.
+Use the async runner to execute **one fresh Gemma session per task** while Gemma works unattended:
 
-This is intentionally slower than blasting everything in one session, but it produces a cleaner eval:
+```bash
+cd ~/projects/gemma-coding-test
+HERMES_PROFILE=gemma scripts/run-gemma-tasks.sh
+```
+
+The runner commits/pushes after each task and stops on the first failure. This preserves clean evaluation boundaries without requiring Jake to manually restart Gemma each time.
+
+This is intentionally more controlled than blasting everything in one session, because it produces a cleaner eval:
 
 1. Gemma receives bounded context.
 2. Each task has a clear diff.
