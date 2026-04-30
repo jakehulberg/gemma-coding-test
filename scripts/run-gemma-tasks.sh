@@ -88,6 +88,10 @@ for packet in "${PACKETS[@]}"; do
 
   if [[ "$DRY_RUN" == "1" ]]; then
     log "DRY_RUN=1: would run hermes -p $HERMES_PROFILE chat -q \"\$(cat $packet)\""
+    if [[ -n "$STOP_AFTER" && "$task_name" == "$STOP_AFTER"* ]]; then
+      log "DRY_RUN=1: reached STOP_AFTER=$STOP_AFTER; stopping preview."
+      break
+    fi
     continue
   fi
 
