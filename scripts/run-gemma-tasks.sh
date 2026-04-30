@@ -95,8 +95,17 @@ for packet in "${PACKETS[@]}"; do
     continue
   fi
 
+  prompt="$(cat "$packet")"
+  prompt="$(printf 'Runner context:
+- Absolute repository path: `%s`
+- Before using file or terminal tools, operate in that exact repository path.
+- Prefer absolute paths under `%s` for file operations.
+- Do not create nested `projects/gemma-coding-test` directories.
+
+%s' "$ROOT_DIR" "$ROOT_DIR" "$prompt")"
+
   set +e
-  hermes -p "$HERMES_PROFILE" chat -q "$(cat "$packet")" 2>&1 | tee "$task_log"
+  hermes -p "$HERMES_PROFILE" chat -q "$prompt" 2>&1 | tee "$task_log"
   hermes_exit=${PIPESTATUS[0]}
   set -e
 
