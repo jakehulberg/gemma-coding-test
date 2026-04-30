@@ -57,7 +57,10 @@ log "Syncing main"
 git checkout main | tee -a "$LOG_DIR/runner.log"
 git pull --ff-only | tee -a "$LOG_DIR/runner.log"
 
-mapfile -t PACKETS < <(find docs/task-packets -maxdepth 1 -type f -name 'TASK-*.md' | sort)
+PACKETS=()
+while IFS= read -r packet; do
+  PACKETS+=("$packet")
+done < <(find docs/task-packets -maxdepth 1 -type f -name 'TASK-*.md' | sort)
 [[ "${#PACKETS[@]}" -gt 0 ]] || fail "no task packets found"
 
 started=0
