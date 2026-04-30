@@ -25,6 +25,7 @@ cd "$ROOT_DIR"
 HERMES_PROFILE="${HERMES_PROFILE:-gemma}"
 START_AT="${START_AT:-}"
 STOP_AFTER="${STOP_AFTER:-}"
+HERMES_TOOLSETS="${HERMES_TOOLSETS:-terminal,file}"
 DRY_RUN="${DRY_RUN:-0}"
 RUN_ID="$(date +%Y%m%d_%H%M%S)"
 LOG_DIR=".arena/gemma-runs/$RUN_ID"
@@ -51,6 +52,7 @@ fi
 log "Starting Gemma task run"
 log "Repo: $ROOT_DIR"
 log "Hermes profile: $HERMES_PROFILE"
+log "Hermes toolsets: $HERMES_TOOLSETS"
 log "Run logs: $LOG_DIR"
 
 log "Syncing main"
@@ -87,7 +89,7 @@ for packet in "${PACKETS[@]}"; do
   task_log="$LOG_DIR/$task_name.log"
 
   if [[ "$DRY_RUN" == "1" ]]; then
-    log "DRY_RUN=1: would run hermes -p $HERMES_PROFILE chat -q \"\$(cat $packet)\""
+    log "DRY_RUN=1: would run hermes -p $HERMES_PROFILE chat -t $HERMES_TOOLSETS -q \"\$(cat $packet)\""
     if [[ -n "$STOP_AFTER" && "$task_name" == "$STOP_AFTER"* ]]; then
       log "DRY_RUN=1: reached STOP_AFTER=$STOP_AFTER; stopping preview."
       break
@@ -105,7 +107,7 @@ for packet in "${PACKETS[@]}"; do
 %s' "$ROOT_DIR" "$ROOT_DIR" "$prompt")"
 
   set +e
-  hermes -p "$HERMES_PROFILE" chat -q "$prompt" 2>&1 | tee "$task_log"
+  hermes -p "$HERMES_PROFILE" chat -t "$HERMES_TOOLSETS" -q "$prompt" 2>&1 | tee "$task_log"
   hermes_exit=${PIPESTATUS[0]}
   set -e
 
